@@ -1,0 +1,60 @@
+DASHBOARD IEPS: CARGA SIN CARPETAS
+
+1. Descomprima SOLAMENTE dashboard_ieps_sin_carpetas.zip.
+2. En GitHub, abra Code > Add file > Upload files.
+3. Seleccione juntos estos tres archivos y guarde con Commit changes:
+   index.html
+   monitor_ieps_base.zip
+   desplegar.py
+
+IMPORTANTE: monitor_ieps_base.zip se sube SIN descomprimirlo.
+Contiene histórico, fuentes y scripts. Actions lo organiza automáticamente;
+usted no sube carpetas src/data/raw.
+
+4. Cree el único archivo que GitHub exige en una ruta especial:
+   Code > Add file > Create new file
+   Nombre: .github/workflows/actualizar-dashboard.yml
+   Abra el actualizar-dashboard.yml de este paquete con Bloc de notas,
+   copie TODO el contenido y péguelo en GitHub. Commit changes en main.
+   Si ya existe ese workflow, edítelo y sustituya todo su contenido por el
+   nuevo: el workflow anterior no sabe abrir monitor_ieps_base.zip.
+   GitHub crea la ruta automáticamente al guardar el archivo.
+
+5. Settings > Pages > Build and deployment > Source > GitHub Actions.
+6. Actions > Actualizar y publicar dashboard IEPS > Run workflow.
+   Rama main, consulta publicar; fecha/año vacíos. Run workflow.
+7. Espere a que preparar y publicar terminen en verde.
+   Settings > Pages muestra el enlace del dashboard.
+
+El YAML y este LEEME pueden permanecer en su equipo. El YAML sólo se activa
+al guardarlo en .github/workflows/actualizar-dashboard.yml, no en la raíz.
+
+CONSULTAS
+- Mensual: día 10, 09:00 CDMX; precios del mes anterior, DOF y complementarios.
+- Renuncias: 1 de julio, 09:00 CDMX; EF.DP.1 y % PIB publicados por SHCP.
+- Recaudación: 10 de enero, marzo, mayo, julio, septiembre y noviembre,
+  09:00 CDMX; cierres anuales en millones de pesos y % PIB de Presto.
+- Run workflow permite elegir publicar/mensual/renuncias/recaudacion.
+
+Una consulta fallida conserva la base anterior, guarda el estado pendiente y
+publica un aviso debajo de las gráficas afectadas. Actions revisa diariamente
+a las 09:00 CDMX y reintenta hasta cumplir un mes calendario desde la consulta
+inicial (fecha límite excluida). Después detiene ese periodo y conserva el aviso.
+Los demás periodos mantienen su calendario habitual. El periodo pendiente no
+cambia aunque el reintento ocurra en otro mes.
+La fecha superior sólo cambia con una consulta válida; carga inicial 09/10/2026.
+Publicar o fallar no adelanta esa fecha.
+Tras una consulta exitosa, Actions guarda index.html y monitor_ieps_base.zip
+actualizados y publica en la misma dirección de Pages. El histórico se
+conserva dentro del ZIP para próximas ejecuciones.
+
+El dashboard actual funciona sin conexión abriendo index.html. Su copia
+local es una instantánea; Actions necesita los tres archivos y el workflow.
+
+Se comprobó la extracción, regeneración y preservación del ZIP localmente.
+La descarga real de Hacienda requiere prueba desde GitHub: Presto respondió
+502 y SHCP devolvió 403 en esta sesión. Un bloqueo conserva los datos y muestra el aviso con reintentos.
+El % PIB actual conserva su advertencia de cotejo anual pendiente hasta una
+consulta de Presto que confirme ambas unidades.
+GitHub puede retrasar calendarios y desactivarlos tras 60 días sin actividad
+en repositorios públicos.
