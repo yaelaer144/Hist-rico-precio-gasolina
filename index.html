@@ -54,7 +54,7 @@ function attachAnnualHover(id,unit){
 }
 [['annualMoney','millones de pesos'],['annualGDP','% del PIB'],['renunciaMoney','millones de pesos'],['renunciaGDP','% del PIB']].forEach(([id,unit])=>attachAnnualHover(id,unit));
 </script><!-- FIN_HOVER_ANUAL --><script id="estadoActualizacion">
-const avisosActualizacion={};
+const avisosActualizacion={"mensual": ["No se pudo actualizar el periodo 2026-09. Se conservan los últimos datos disponibles. Se reintentará diariamente hasta el 10/11/2026 (sin incluir ese día)."]};
 function mostrarAviso(id,tipo){const root=document.getElementById(id);if(!root)return;root.querySelectorAll('.aviso-actualizacion').forEach(n=>n.remove());(avisosActualizacion[tipo]||[]).forEach(texto=>{const p=document.createElement('p');p.className='small aviso-actualizacion';p.style.cssText='color:#a23e24;padding:10px 0;border-top:1px solid #e6ecf2';p.setAttribute('role','status');p.textContent=texto;root.appendChild(p);});}
 const dibujarAnterior=draw;draw=function(k){dibujarAnterior(k);mostrarAviso('plot-'+k,'mensual');};
 ['regular','premium','diesel'].forEach(k=>mostrarAviso('plot-'+k,'mensual'));
