@@ -32,8 +32,10 @@ al guardarlo en .github/workflows/actualizar-dashboard.yml, no en la raíz.
 CONSULTAS
 - Mensual: día 10, 09:00 CDMX; precios del mes anterior, DOF y complementarios.
 - Renuncias: 1 de julio, 09:00 CDMX; EF.DP.1 y % PIB publicados por SHCP.
-- Recaudación: 10 de enero, marzo, mayo, julio, septiembre y noviembre,
-  09:00 CDMX; cierres anuales en millones de pesos y % PIB de Presto.
+- Recaudación PRESTO: último día de CADA mes (28, 29, 30 o 31),
+  a las 09:00 CDMX; conserva actualmente su consulta ANUAL en millones
+  de pesos y % PIB. La serie MENSUAL ACUMULADA necesita otro extractor
+  y no debe confundirse con el cierre anual existente.
 - Run workflow permite elegir publicar/mensual/renuncias/recaudacion.
 
 Una consulta fallida conserva la base anterior, guarda el estado pendiente y
@@ -58,3 +60,19 @@ El % PIB actual conserva su advertencia de cotejo anual pendiente hasta una
 consulta de Presto que confirme ambas unidades.
 GitHub puede retrasar calendarios y desactivarlos tras 60 días sin actividad
 en repositorios públicos.
+
+NUEVA GRÁFICA: RECAUDACIÓN ACUMULADA (MILLONES DE PESOS)
+- Ya se incorpora la sección en el HTML, sin cifras mensuales inventadas.
+- La consulta automática de recaudación se intenta el último día de cada mes,
+  conservando reintentos diarios por un mes si la consulta no es validada.
+- Para los dos ejercicios, el extractor solicita pesos corrientes multianual,
+  millones de pesos y periodicidad mensual, y suma los FLUJOS mensuales de
+  enero hasta cada mes para producir acumulados.
+- La extracción real con PRESTO no pudo verificarse durante la preparación:
+  si la descarga cambia sus encabezados, no se publica una serie equivocada;
+  habrá que ajustar el lector al archivo real.
+- La recaudación ANUAL existente sigue visible e independiente.
+- CSV y PNG de la nueva gráfica se activan cuando haya cifras validadas.
+- Para incorporar manualmente un archivo PRESTO de prueba dentro del proyecto:
+  python src/recaudacion_mensual.py --archivo /ruta/exportacion.xls --ano 2026
+  Se exige encabezado claro con mes y año, periodicidad y unidad oficiales.
