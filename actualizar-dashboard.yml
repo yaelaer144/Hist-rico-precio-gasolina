@@ -6,6 +6,9 @@ on:
   schedule:
     # UTC: 15:00 = 09:00 en Ciudad de México.
     - cron: '0 15 * * *'
+    # Viernes 21:00 hora CDMX = sabado 03:00 UTC (Mexico no usa horario de verano).
+    # Actualiza las cuotas DOF para la semana siguiente, aun si falta el precio CNE.
+    - cron: '0 3 * * 6'
   workflow_dispatch:
     inputs:
       consulta:

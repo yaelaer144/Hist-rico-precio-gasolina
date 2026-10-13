@@ -76,3 +76,9 @@ NUEVA GRÁFICA: RECAUDACIÓN ACUMULADA (MILLONES DE PESOS)
 - Para incorporar manualmente un archivo PRESTO de prueba dentro del proyecto:
   python src/recaudacion_mensual.py --archivo /ruta/exportacion.xls --ano 2026
   Se exige encabezado claro con mes y año, periodicidad y unidad oficiales.
+
+ACTUALIZACION SEMANAL DOF
+- Cada viernes 21:00 hora de Ciudad de Mexico: GitHub Actions realiza una revision adicional de cuotas DOF.
+- GitHub cron se programa a sabado 03:00 UTC: 0 3 * * 6.
+- Se mantiene la revision diaria 09:00 y los calendarios de recaudacion, sin inventar precios que no publique CNE.
+- Subir actualizar-dashboard.yml en .github/workflows/actualizar-dashboard.yml; no basta subirlo a la raiz.
