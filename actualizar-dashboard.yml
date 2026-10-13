@@ -41,6 +41,7 @@ jobs:
       TZ: America/Mexico_City
       IEPS_SOLO_DASHBOARD: '1'
       PYTHONUNBUFFERED: '1'
+      IEPS_BACKFILL: '1'
     steps:
       - name: Descargar repositorio e histórico
         uses: actions/checkout@v6
