@@ -292,3 +292,50 @@ print(
     "CNE automático: corrección aplicada; "
     "cuotas y funciones originales conservadas."
 )
+
+
+# Adaptar la prueba al estado real de la base.
+prueba = Path("monitor_ieps/tests/test_reintentos.py")
+codigo = prueba.read_text(encoding="utf-8")
+
+inicio = (
+    "   antes=(root/'data/master.json').read_bytes()"
+)
+reemplazo = (
+    "   antes=(root/'data/master.json').read_bytes()\n"
+    "   fecha_anterior=json.loads("
+    "(root/'data/estado_actualizacion.json').read_text()"
+    ")['ultima_actualizacion_datos']"
+)
+
+if inicio in codigo:
+    codigo = codigo.replace(inicio, reemplazo, 1)
+
+    objetivo = (
+        "self.assertEqual("
+        "e['ultima_actualizacion_datos'],'2026-10-09')"
+    )
+
+    posicion = codigo.index(
+        "class FallaConsulta"
+    )
+    anterior = codigo[:posicion]
+    posterior = codigo[posicion:].replace(
+        objetivo,
+        "self.assertEqual("
+        "e['ultima_actualizacion_datos'],fecha_anterior)",
+        1
+    )
+    codigo = anterior + posterior
+
+    prueba.write_text(codigo, encoding="utf-8")
+    print("Prueba de conservación del estado corregida")
+
+elif "fecha_anterior=json.loads(" in codigo:
+    print("La prueba ya fue corregida")
+
+else:
+    raise RuntimeError(
+        "No se encontró la estructura esperada de la prueba"
+    )
+
