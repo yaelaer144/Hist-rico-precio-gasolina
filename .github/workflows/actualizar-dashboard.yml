@@ -50,6 +50,9 @@ jobs:
       - name: Organizar automáticamente el proyecto
         run: python3 desplegar.py extraer
         
+      - name: Corregir descarga y lectura CNE
+        run: python3 corregir_cne.py
+
       - name: Permitir reintentos mensuales manuales
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.consulta == 'mensual' }}
         shell: bash
