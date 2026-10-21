@@ -143,6 +143,15 @@ jobs:
           python src/agregar_recaudacion_mensual.py
           python src/ajustes_graficas.py
 
+      - name: Sincronizar precios CNE automáticamente
+        run: |
+          python3 sincronizar_cne.py
+          cd monitor_ieps
+          python src/generar_index.py
+          python src/agregar_recaudacion.py
+          python src/agregar_recaudacion_mensual.py
+          python src/ajustes_graficas.py
+
       - name: Guardar datos validados en GitHub
         env:
           RAMA: ${{ github.event.repository.default_branch }}
