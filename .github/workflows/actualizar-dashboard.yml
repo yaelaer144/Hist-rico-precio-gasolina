@@ -53,32 +53,6 @@ jobs:
       - name: Corregir descarga y lectura CNE
         run: python3 corregir_cne.py
 
-      - name: Permitir reintentos mensuales manuales
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.consulta == 'mensual' }}
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          archivo = Path("monitor_ieps/src/calendario_actualizacion.py")
-          codigo = archivo.read_text(encoding="utf-8")
-
-          lineas = codigo.splitlines()
-          nuevas = []
-
-          for linea in lineas:
-              nuevas.append(linea)
-              if "tarea.pop('ultimo_intento',None)" in linea:
-                  nuevas.append("  tarea.pop('ultimo_intento',None)")
-
-          archivo.write_text(
-              "\n".join(nuevas) + "\n",
-              encoding="utf-8"
-          )
-
-          print("Reintentos manuales habilitados")
-          PY
-
       - name: Preparar Python
         uses: actions/setup-python@v6
         with:
