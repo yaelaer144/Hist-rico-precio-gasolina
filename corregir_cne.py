@@ -6,13 +6,37 @@ src = Path("monitor_ieps/src")
 mensual = src / "actualizar_mensual.py"
 calendario = src / "calendario_actualizacion.py"
 
+import re
+
 texto = mensual.read_text(encoding="utf-8")
-entrada = "if __name__=='__main__':main()"
 
-if entrada not in texto:
-    raise RuntimeError("No se encontró el programa mensual original")
+# Reconocer si la actualización CNE ya está instalada.
+ya_instalado = all(
+    nombre in texto
+    for nombre in (
+        "def url_mensual_cne(",
+        "def descargar_excel_cne(",
+        "def leer_excel_cne(",
+    )
+)
 
-texto = texto.replace(entrada, "", 1)
+if ya_instalado:
+    print("CNE: corrección ya incorporada.")
+else:
+    patron = (
+        r"(?m)^if\s+__name__\s*==\s*"
+        r"""['"]__main__['"]\s*:\s*"""
+        r"main\(\)\s*$"
+    )
+
+    texto, cantidad = re.subn(patron, "", texto, count=1)
+
+    if cantidad != 1:
+        raise RuntimeError(
+            "No se encontró el punto de entrada original. "
+            "Se requiere revisar actualizar_mensual.py."
+        )
+
 
 texto += r'''
 
