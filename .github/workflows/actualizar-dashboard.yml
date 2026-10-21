@@ -50,12 +50,6 @@ jobs:
       - name: Organizar automáticamente el proyecto
         run: python3 desplegar.py extraer
 
-      - name: Incorporar correcciones CNE
-        run: |
-          cp actualizar_mensual.py monitor_ieps/src/actualizar_mensual.py
-          cp calendario_actualizacion.py monitor_ieps/src/calendario_actualizacion.py
-          echo "Correcciones CNE incorporadas."
-
       - name: Preparar Python
         uses: actions/setup-python@v6
         with:
