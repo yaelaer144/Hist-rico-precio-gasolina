@@ -63,6 +63,47 @@ jobs:
       - name: Instalar dependencias
         run: python -m pip install -r monitor_ieps/requirements.txt
 
+      - name: Habilitar nueva consulta mensual manual
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.consulta == 'mensual' }}
+        env:
+          FECHA_REFERENCIA: ${{ inputs.fecha }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import datetime as dt
+          from pathlib import Path
+
+          archivo = Path("monitor_ieps/data/estado_actualizacion.json")
+
+          if not archivo.exists():
+              print("Sin estado previo; se creara la tarea mensual.")
+          else:
+              estado = json.loads(archivo.read_text(encoding="utf-8"))
+
+              fecha = dt.date.fromisoformat(
+                  os.environ.get("FECHA_REFERENCIA")
+                  or dt.date.today().isoformat()
+              )
+
+              anterior = fecha.replace(day=1) - dt.timedelta(days=1)
+              clave = "mensual:" + anterior.strftime("%Y-%m")
+              tarea = estado.get("tareas", {}).get(clave)
+
+              if tarea is not None:
+                  tarea["estado"] = "pendiente"
+                  tarea.pop("ultimo_intento", None)
+
+                  archivo.write_text(
+                      json.dumps(estado, ensure_ascii=False, indent=2),
+                      encoding="utf-8"
+                  )
+
+                  print("Reintento habilitado:", clave)
+              else:
+                  print("Se creara una nueva tarea:", clave)
+          PY
+
       - name: Determinar consultas pendientes
         id: plan
         working-directory: monitor_ieps
