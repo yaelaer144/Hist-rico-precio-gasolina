@@ -53,6 +53,9 @@ jobs:
       - name: Corregir descarga y lectura CNE
         run: python3 corregir_cne.py
 
+      - name: Separar fechas CNE y DOF
+        run: python3 separar_fechas_ieps.py
+
       - name: Preparar Python
         uses: actions/setup-python@v6
         with:
