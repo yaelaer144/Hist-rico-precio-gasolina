@@ -156,7 +156,63 @@ jobs:
         env:
           RAMA: ${{ github.event.repository.default_branch }}
         run: |
+          
           python desplegar.py guardar
+          python3 - <<'PY'
+          from pathlib import Path
+          from collections import defaultdict
+          import json
+          import datetime as dt
+
+          base = Path("monitor_ieps/data/master.json")
+          interno = Path("monitor_ieps/index.html")
+          publico = Path("index.html")
+
+          filas = json.loads(base.read_text(encoding="utf-8"))
+          precios = defaultdict(set)
+
+          for fila in filas:
+              if fila.get("precio") is not None:
+                  precios[fila["fecha"]].add(fila["combustible"])
+
+          fechas = [
+              fecha for fecha, combustibles in precios.items()
+              if {"regular", "premium", "diesel"} <= combustibles
+          ]
+
+          if not fechas:
+              raise RuntimeError("No existen precios completos")
+
+          ultima = max(fechas)
+          fecha = dt.date.fromisoformat(ultima)
+          meses = (
+              "enero febrero marzo abril mayo junio julio "
+              "agosto septiembre octubre noviembre diciembre"
+          ).split()
+
+          fecha_texto = (
+              f"{fecha.day} de {meses[fecha.month - 1]} "
+              f"de {fecha.year}"
+          )
+
+          html = interno.read_text(encoding="utf-8")
+
+          if fecha_texto not in html:
+              raise RuntimeError(
+                  "El HTML interno no muestra el último precio: "
+                  + fecha_texto
+              )
+
+          publico.write_text(html, encoding="utf-8")
+
+          if publico.read_bytes() != interno.read_bytes():
+              raise RuntimeError("El HTML público difiere del interno")
+
+          print("Último precio:", ultima)
+          print("HTML público validado:", fecha_texto)
+          print("Publicación lista para guardar")
+          PY
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
