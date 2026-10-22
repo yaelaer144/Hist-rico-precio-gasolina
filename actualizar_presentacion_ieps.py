@@ -1,5 +1,5 @@
 
-"""Actualiza automáticamente las fechas visibles del dashboard IEPS."""
+"""Actualiza y valida automáticamente las fechas del dashboard IEPS."""
 
 from pathlib import Path
 from collections import defaultdict
@@ -57,29 +57,35 @@ def main():
         )
 
     ultimo_precio = max(completas)
+    fecha_precio = texto_fecha(ultimo_precio)
+
     html = HTML.read_text(encoding="utf-8")
 
-    # Actualizar el aviso de precios.
-    patron = (
+    # 1. Actualizar el aviso visible de precios.
+    patron_precios = (
         r"Los precios disponibles terminan el\s*"
         r"<b>.*?</b>\."
     )
 
-    nuevo = (
+    nuevo_aviso = (
         "Los precios disponibles terminan el "
-        f"<b>{texto_fecha(ultimo_precio)}</b>."
+        f"<b>{fecha_precio}</b>."
     )
 
     html, cambios = re.subn(
-        patron, nuevo, html, count=1, flags=re.I
+        patron_precios,
+        nuevo_aviso,
+        html,
+        count=1,
+        flags=re.I | re.S
     )
 
     if cambios != 1:
         raise RuntimeError(
-            "No se encontró el aviso de precios"
+            "No se encontró el aviso de precios para actualizar"
         )
 
-    # Actualizar la fecha de las cuotas.
+    # 2. Actualizar la fecha visible de las cuotas.
     if ultima_cuota:
         nuevo_fiscal = (
             "Las cuotas disponibles llegan hasta el "
@@ -93,11 +99,14 @@ def main():
             r"<b>.*?</b>\."
         ):
             html = re.sub(
-                patron, nuevo_fiscal, html,
-                count=1, flags=re.I
+                patron,
+                nuevo_fiscal,
+                html,
+                count=1,
+                flags=re.I | re.S
             )
 
-    # Mostrar inicialmente el último día con precios completos.
+    # 3. Actualizar el selector final de fechas.
     html, cambios = re.subn(
         r'(<input\s+id="end"\s+type="date"\s+value=")'
         r'[^"]+("\s+min=)',
@@ -111,19 +120,54 @@ def main():
             "No se encontró el selector final de fechas"
         )
 
-    # Comprobar que la fecha realmente existe en el HTML.
+    # 4. Validar específicamente el aviso visible.
+    # No basta con que la fecha aparezca en los datos.
+    aviso = re.search(
+        r"Los precios disponibles terminan el\s*"
+        r"<b>([^<]+)</b>\.",
+        html,
+        flags=re.I | re.S
+    )
+
+    if not aviso:
+        raise RuntimeError(
+            "No se encontró el aviso visible de precios"
+        )
+
+    fecha_visible = aviso.group(1).strip()
+
+    if fecha_visible != fecha_precio:
+        raise RuntimeError(
+            f"Aviso desactualizado: {fecha_visible!r}; "
+            f"debería indicar {fecha_precio}"
+        )
+
+    # 5. Validar el valor del selector final.
+    selector = re.search(
+        r'<input\s+id="end"\s+type="date"\s+value="([^"]+)"',
+        html
+    )
+
+    if not selector or selector.group(1) != ultimo_precio:
+        raise RuntimeError(
+            "El selector final no coincide con "
+            f"la última fecha de precios: {ultimo_precio}"
+        )
+
+    # 6. Comprobar la presencia de la fecha en el HTML.
     if ultimo_precio not in html:
         raise RuntimeError(
             "El HTML no contiene la última fecha de precios"
         )
 
+    # 7. Guardar solamente después de superar
+    # todas las validaciones.
     HTML.write_text(html, encoding="utf-8")
 
-    print(
-        "CNE: última fecha completa de precios:",
-        ultimo_precio
-    )
+    print("CNE: última fecha completa de precios:", ultimo_precio)
     print("DOF: última fecha con cuota:", ultima_cuota)
+    print("Aviso visible validado:", fecha_precio)
+    print("Selector de fechas validado:", ultimo_precio)
     print("HTML actualizado automáticamente.")
 
 
