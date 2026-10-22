@@ -151,7 +151,12 @@ jobs:
           python src/agregar_recaudacion.py
           python src/agregar_recaudacion_mensual.py
           python src/ajustes_graficas.py
-
+          
+      - name: Copiar dashboard actualizado
+        run: |
+          cp monitor_ieps/index.html index.html
+          echo "HTML actualizado copiado a la raíz"
+          
       - name: Guardar datos validados en GitHub
         env:
           RAMA: ${{ github.event.repository.default_branch }}
